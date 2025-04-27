@@ -1,8 +1,9 @@
 package main
 
 import (
-	"testing"
+	"net/url"
 	"reflect"
+	"testing"
 )
 
 func TestGetURLsFromHTML(t *testing.T) {
@@ -33,7 +34,8 @@ func TestGetURLsFromHTML(t *testing.T) {
 
 	for i, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			actual, err := getURLsFromHTML(tc.inputBody, tc.inputURL)
+			baseURL, _ := url.Parse(tc.inputURL)
+			actual, err := getURLsFromHTML(tc.inputBody, baseURL)
 			if err != nil {
 				t.Errorf("Test %v - '%s' FAIL: unexpected error: %v", i, tc.name, err)
 				return

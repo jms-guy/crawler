@@ -1,19 +1,14 @@
 package main
 
 import (
-	"log"
 	"net/url"
 	"strings"
 )
 
-func normalizeURL(rawURL string) (string, error) {
-	u, err := url.Parse(rawURL)
-	if err != nil {
-		log.Printf("Error parsing url: %s : %s", rawURL, err)
-		return "", err
-	}
-
-	u.Path = strings.TrimRight(u.Path, "/")
-	normalizedUrl := u.Host + u.Path
+//Take url.URL struct and normalize URL data into
+// [scheme][host]/[path] format
+func normalizeURL(rawURL *url.URL) (string, error) {
+	rawURL.Path = strings.TrimRight(rawURL.Path, "/")
+	normalizedUrl := "http://" + rawURL.Host + rawURL.Path
 	return normalizedUrl, nil
 }
