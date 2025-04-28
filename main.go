@@ -8,11 +8,11 @@ import (
 	"sync"
 )
 
-//Will crawl a given website, avoiding links that take it to a new domain.
-
 type config struct {
 	//The list of pages crawled, number of times page was seen, and max number of pages to visit
 	pages				map[string]int
+	externalLinks		map[string]int
+	errorPages			[]errorPages
 	maxPages			int
 	//Base URL given to crawler
 	baseURL				*url.URL
@@ -21,6 +21,9 @@ type config struct {
 	concurrencyControl	chan struct{}
 	wg					*sync.WaitGroup
 }
+
+//Arbitary max number of pages to set if user inputs 0 as amount
+var maxNumofPages int = 10000
 
 func main() {
 	//User arguments
@@ -51,6 +54,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	//If user has entered a max number of pages of 0
+	//Sets max to var maxNumofPages
+	if maxPageNumberInt == 0 {
+		maxPageNumberInt = maxNumofPages
+	}
+
 	//Parse URL argument for url.URL struct
 	baseUrl, err := url.Parse(baseUrlInput)
 	if err != nil {
@@ -61,6 +70,8 @@ func main() {
 	//Initialize config
 	cfg := config{
 		pages: 				make(map[string]int),
+		externalLinks: 		make(map[string]int),
+		errorPages: 		make([]errorPages, 0),
 		maxPages: 			maxPageNumberInt,
 		baseURL: 			baseUrl,
 		mu: 				&sync.Mutex{},
@@ -86,9 +97,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	log.Printf("%d pages visisted.", len(cfg.pages))
 	//Print page results to stdout
-	for key, val := range cfg.pages {
-		log.Printf("\rPage: %s seen %d time(s).", key, val)
-	}
+	cfg.printReport(cfg.pages, baseUrlInput)
 }

@@ -29,6 +29,11 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 
 	//If current URL leads off-domain, we don't want to crawl it
 	if currentURLData.Host != cfg.baseURL.Host {
+		_, ok := cfg.externalLinks[rawCurrentURL]
+		if ok {
+			return
+		}
+		cfg.externalLinks[rawCurrentURL] = 1
 		return
 	}
 
@@ -58,6 +63,7 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 	htmlResult, err := getHTML(currentURLNormalized)
 	if err != nil {
 		log.Printf("Error getting html from current url: %s", err)
+		cfg.handleErrorPages(currentURLNormalized, err)
 		return
 	}
 	log.Printf("\rGrabbed HTML successfully from URL: %s", currentURLNormalized)
